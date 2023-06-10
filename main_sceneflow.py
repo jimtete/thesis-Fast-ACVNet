@@ -12,6 +12,7 @@ from torch.autograd import Variable
 import torchvision.utils as vutils
 import torch.nn.functional as F
 import numpy as np
+import random
 import time
 from tensorboardX import SummaryWriter
 from datasets import __datasets__
@@ -27,12 +28,12 @@ parser = argparse.ArgumentParser(description='Accurate and Efficient Stereo Matc
 parser.add_argument('--model', default='Fast_ACVNet_plus', help='select a model structure', choices=__models__.keys())
 parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity')
 parser.add_argument('--dataset', default='sceneflow', help='dataset name', choices=__datasets__.keys())
-parser.add_argument('--datapath', default="/data/sceneflow/", help='data path')
+parser.add_argument('--datapath', default="/home/jimtete/sceneflow_data/", help='data path')
 parser.add_argument('--trainlist', default='./filenames/sceneflow_train.txt', help='training list')
 parser.add_argument('--testlist',default='./filenames/sceneflow_test.txt', help='testing list')
 parser.add_argument('--lr', type=float, default=0.001, help='base learning rate')
-parser.add_argument('--batch_size', type=int, default=20, help='training batch size')
-parser.add_argument('--test_batch_size', type=int, default=20, help='testing batch size')
+parser.add_argument('--batch_size', type=int, default=1, help='training batch size')
+parser.add_argument('--test_batch_size', type=int, default=1, help='testing batch size')
 parser.add_argument('--epochs', type=int, default=24, help='number of epochs to train')
 parser.add_argument('--lrepochs',default="10,15,18,21:2", type=str,  help='the epochs to decay lr: the downscale rate')
 parser.add_argument('--attention_weights_only', default=False, type=str,  help='only train attention weights')
@@ -104,10 +105,13 @@ def train():
                 save_scalars(logger, 'train', scalar_outputs, global_step)
                 save_images(logger, 'train', image_outputs, global_step)
             del scalar_outputs, image_outputs
-            print('Epoch {}/{}, Iter {}/{}, train loss = {:.3f}, time = {:.3f}'.format(epoch_idx, args.epochs,
-                                                                                       batch_idx,
-                                                                                       len(TrainImgLoader), loss,
-                                                                                       time.time() - start_time))
+
+            number = random.randint(1, 100)
+            if (number == 50):
+                print('Epoch {}/{}, Iter {}/{}, train loss = {:.3f}, time = {:.3f}'.format(epoch_idx, args.epochs,
+                                                                                           batch_idx,
+                                                                                           len(TrainImgLoader), loss,
+                                                                                           time.time() - start_time))
 
             
 
@@ -134,6 +138,7 @@ def train():
                save_images(logger, 'test', image_outputs, global_step)
             avg_test_scalars.update(scalar_outputs)
             del scalar_outputs, image_outputs
+
             print('Epoch {}/{}, Iter {}/{}, test loss = {:.3f}, time = {:3f}'.format(epoch_idx, args.epochs,
                                                                                      batch_idx,
                                                                                      len(TestImgLoader), loss,

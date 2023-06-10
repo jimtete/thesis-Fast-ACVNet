@@ -1,6 +1,8 @@
 from __future__ import print_function, division
 import argparse
 import os
+import sys
+
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -29,10 +31,10 @@ parser = argparse.ArgumentParser(description='Accurate and Efficient Stereo Matc
 parser.add_argument('--model', default='Fast_ACVNet_plus', help='select a model structure', choices=__models__.keys())
 parser.add_argument('--maxdisp', type=int, default=192, help='maximum disparity')
 parser.add_argument('--dataset', default='kitti', help='dataset name', choices=__datasets__.keys())
-parser.add_argument('--kitti15_datapath', default='/data/KITTI/KITTI_2015/', help='data path')
-parser.add_argument('--kitti12_datapath', default='/data/KITTI/KITTI_2012/', help='data path')
-parser.add_argument('--testlist', default='./filenames/kitti15_test.txt', help='testing list')
-parser.add_argument('--loadckpt', default='',help='load the weights from a specific checkpoint')
+parser.add_argument('--kitti15_datapath', default='/home/jimtete/data/KITTI_2015/', help='data path')
+parser.add_argument('--kitti12_datapath', default='/home/jimtete/data/KITTI_2012/', help='data path')
+parser.add_argument('--testlist', default='./filenames/kitti12_test.txt', help='testing list')
+parser.add_argument('--loadckpt', default='/home/jimtete/sceneflow_data/sceneflow.ckpt', help='load the weights from a specific checkpoint')
 parser.add_argument('--attention_weights_only', default=False, type=str,  help='only train attention weights')
 # parse arguments
 args = parser.parse_args()
@@ -53,12 +55,26 @@ state_dict = torch.load(args.loadckpt)
 model.load_state_dict(state_dict['model'])
 
 
-save_dir = './output/kitti15/disp_0'
+save_dir = './output/kitti12/disp_0'
 
 
 def test():
     os.makedirs(save_dir, exist_ok=True)
     for batch_idx, sample in enumerate(TestImgLoader):
+
+        # dict_str = str(sample)
+        #
+        # # Step 2: Open file in write mode
+        # with open('output.txt', 'w') as file:
+        #     # Step 3: Write string representation to the file
+        #     file.write(dict_str)
+        #
+        # sys.exit()
+        #
+        # print(type(sample))
+        # print(sample)
+
+
         start_time = time.time()
         disp_est_np = tensor2numpy(test_sample(sample))
         print('Iter {}/{}, time = {:3f}'.format(batch_idx, len(TestImgLoader),
